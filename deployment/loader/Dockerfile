@@ -10,5 +10,5 @@ RUN go build -v -o ./bin/loader  ./cmd/loader
 # COPY --from=build /usr/src/app/socialnet/bin/socialnet /usr/src/app/socialnet/bin/socialnet
 #WORKDIR /usr/src/app/socialnet
 
-ENTRYPOINT [ "sleep 60 && ./bin/loader"]
+ENTRYPOINT [ "sleep", "60", "&&", "./bin/loader"]
 # CMD ["-config", "./configs/server.pgsql.yaml"] 
