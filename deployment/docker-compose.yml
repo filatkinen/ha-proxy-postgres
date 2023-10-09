@@ -13,8 +13,7 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - front
-      - back
+      - local
     volumes:
       - "./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
     ports:
@@ -31,11 +30,11 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 15
 #    environment:
 #      - PGPORT=5432
     networks:
-      - back
+      - local
 
   pgsql02:
     build:
@@ -45,11 +44,11 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 15
 #    environment:
 #      - PGPORT=5432
     networks:
-      - back
+      - local
 
   pgsql03:
     build:
@@ -59,29 +58,28 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 15
     networks:
-      - back
+      - local
 
 
 
-#  loaderapp:
-#    build:
-#      context: loader
-#    container_name: lab10_loader
-#    depends_on:
-#      pgsql01:
-#        condition: service_healthy
-#      pgsql02:
-#        condition: service_healthy
-#      pgsql03:
-#        condition: service_healthy
-#    restart: always
-#    tty: true
-#    stdin_open: true
-#    networks:
-#      - front
+  loaderapp:
+    build:
+      context: loader
+    container_name: lab10_loader
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
 
 networks:
-  front:
-  back:
+  local:

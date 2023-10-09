@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
@@ -115,12 +116,19 @@ func threadQuery(connURL string, wg *sync.WaitGroup, threadNumber int, chanClose
 }
 
 func queryDialogs(conn *pgx.Conn) error {
-	var numberUsers int
-	err := conn.QueryRow(context.Background(), `select count(user_id) from users`).Scan(&numberUsers)
+	err := conn.Ping(context.Background())
 	if err != nil {
 		return err
 	}
 
+	var numberUsers int
+	err = conn.QueryRow(context.Background(), `select count(user_id) from users`).Scan(&numberUsers)
+	if err != nil {
+		return err
+	}
+	if numberUsers == 0 {
+		return errors.New("0 users")
+	}
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 
