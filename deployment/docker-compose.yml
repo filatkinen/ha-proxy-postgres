@@ -13,11 +13,12 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - local
+      - front
+      - back
     volumes:
       - "./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
     ports:
-      - "5432:5432"
+      - "5433:5432"
       - "8404:8404"
 
 
@@ -31,8 +32,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+#    environment:
+#      - PGPORT=5432
     networks:
-      - local
+      - back
 
   pgsql02:
     build:
@@ -43,8 +46,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+#    environment:
+#      - PGPORT=5432
     networks:
-      - local
+      - back
 
   pgsql03:
     build:
@@ -56,26 +61,27 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - local
+      - back
 
 
 
-  loaderapp:
-    build:
-      context: loader
-    container_name: lab10_loader
-    depends_on:
-      pgsql01:
-        condition: service_healthy
-      pgsql02:
-        condition: service_healthy
-      pgsql03:
-        condition: service_healthy
-    restart: always
-    tty: true
-    stdin_open: true
-    networks:
-      - local
+#  loaderapp:
+#    build:
+#      context: loader
+#    container_name: lab10_loader
+#    depends_on:
+#      pgsql01:
+#        condition: service_healthy
+#      pgsql02:
+#        condition: service_healthy
+#      pgsql03:
+#        condition: service_healthy
+#    restart: always
+#    tty: true
+#    stdin_open: true
+#    networks:
+#      - front
 
 networks:
-  local:
+  front:
+  back:

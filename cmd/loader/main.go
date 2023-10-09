@@ -65,6 +65,11 @@ func threadQuery(connURL string, wg *sync.WaitGroup, threadNumber int, chanClose
 			fmt.Printf("Thread %d - Unable to connect to database: %v\n", threadNumber, err)
 			return err
 		}
+		err = conn.Ping(context.Background())
+		if err != nil {
+			fmt.Printf("Thread %d - Unable to ping  database: %v\n", threadNumber, err)
+			return err
+		}
 		fmt.Printf("Thread %d OK connection to DB:\n", threadNumber)
 		return nil
 	}
