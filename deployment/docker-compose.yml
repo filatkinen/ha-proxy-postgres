@@ -4,7 +4,14 @@ services:
   haproxy:
     image: haproxy
     container_name: lab10_haproxy
-    restart: "no"
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
     networks:
       - local
     volumes:
@@ -53,7 +60,7 @@ services:
 
 
 
-  mainapp:
+  loaderapp:
     build:
       context: loader
     container_name: lab10_loader
@@ -69,29 +76,6 @@ services:
     stdin_open: true
     networks:
       - local
-
-  dialogapp:
-    build:
-      context: dialog
-    container_name: socialnet_dialog
-    depends_on:
-      pgsql:
-        condition: service_healthy
-    restart: always
-    tty: true
-    stdin_open: true
-    ports:
-      - "8801:8801"
-    networks:
-      - local
-    environment:
-      - DIALOG_DB_TYPE=pgsql
-      - DIALOG_DB_PORT=5432
-      - DIALOG_DB_ADDRESS=socialnet_pgsql
-      - DIALOG_DB=snet_dialog
-      - DIALOG_DB_PASS=socialnet
-      - DIALOG_DB_USER=socialnet
-
 
 networks:
   local:

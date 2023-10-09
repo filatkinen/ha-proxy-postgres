@@ -3,7 +3,7 @@ WORKDIR /usr/src/app/
 
 RUN  git  clone https://github.com/filatkinen/ha-proxy-postgres
 WORKDIR /usr/src/app/ha-proxy-postgres
-COPY loader /usr/src/app/ha-proxy-postgres/
+COPY loader.env /usr/src/app/ha-proxy-postgres/
 RUN go build -v -o ./bin/loader  ./cmd/loader
 
 # FROM scratch
