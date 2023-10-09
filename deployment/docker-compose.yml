@@ -1,0 +1,97 @@
+version: '3'
+
+services:
+  haproxy:
+    image: haproxy
+    container_name: lab10_haproxy
+    restart: "no"
+    networks:
+      - local
+    volumes:
+      - "./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    ports:
+      - "5432:5432"
+      - "8404:8404"
+
+
+
+  pgsql01:
+    build:
+      context: ./pgsql
+    container_name: lab10_pgsql01
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local
+
+  pgsql02:
+    build:
+      context: ./pgsql
+    container_name: lab10_pgsql02
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local
+
+  pgsql03:
+    build:
+      context: ./pgsql
+    container_name: lab10_pgsql03
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local
+
+
+
+  mainapp:
+    build:
+      context: loader
+    container_name: lab10_loader
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
+
+  dialogapp:
+    build:
+      context: dialog
+    container_name: socialnet_dialog
+    depends_on:
+      pgsql:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    ports:
+      - "8801:8801"
+    networks:
+      - local
+    environment:
+      - DIALOG_DB_TYPE=pgsql
+      - DIALOG_DB_PORT=5432
+      - DIALOG_DB_ADDRESS=socialnet_pgsql
+      - DIALOG_DB=snet_dialog
+      - DIALOG_DB_PASS=socialnet
+      - DIALOG_DB_USER=socialnet
+
+
+networks:
+  local:
