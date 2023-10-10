@@ -1,14 +1,12 @@
-FROM golang:latest
+FROM golang:1.21-alpine
 WORKDIR /usr/src/app/
 
-RUN  git  clone https://github.com/filatkinen/ha-proxy-postgres
-WORKDIR /usr/src/app/ha-proxy-postgres
-COPY loader.env /usr/src/app/ha-proxy-postgres/
+COPY . /usr/src/app/
+COPY ./deployment/loader/loader.env /usr/src/app/loader.env
+COPY ./deployment/loader/start.sh /usr/src/app/start.sh
+
 RUN go build -v -o ./bin/loader  ./cmd/loader
 
-# FROM scratch
-# COPY --from=build /usr/src/app/socialnet/bin/socialnet /usr/src/app/socialnet/bin/socialnet
-#WORKDIR /usr/src/app/socialnet
 
-ENTRYPOINT [ "sleep", "60", "&&", "./bin/loader"]
-# CMD ["-config", "./configs/server.pgsql.yaml"] 
+ENTRYPOINT [ "./start.sh"]
+

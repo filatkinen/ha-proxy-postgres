@@ -19,7 +19,7 @@ const (
 	Threads          = 20
 	TimeSleepQuery   = time.Millisecond * 1
 	TimeStat         = time.Second * 10
-	ConnectAttempts  = 5
+	ConnectAttempts  = 100
 	TimeSleepAttempt = time.Second * 3
 )
 
@@ -115,8 +115,14 @@ func threadQuery(connURL string, wg *sync.WaitGroup, threadNumber int, chanClose
 	}
 }
 
-func queryDialogs(conn *pgx.Conn) error {
-	err := conn.Ping(context.Background())
+func queryDialogs(conn *pgx.Conn) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("recoverd from panic:%v", e)
+		}
+	}()
+
+	err = conn.Ping(context.Background())
 	if err != nil {
 		return err
 	}

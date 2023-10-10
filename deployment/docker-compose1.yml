@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+
+  loaderapp:
+    build:
+      context: ../
+      dockerfile: ./deployment/loader/Dockerfile
+    container_name: lab10_loader
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
+
+  haproxy:
+    build:
+      context: ../
+      dockerfile: ./deployment/haproxy/Dockerfile
+    container_name: lab10_haproxy
+    restart: always
+    networks:
+      - local
+    ports:
+      - "5433:5432"
+      - "8404:8404"
+
+
+
+networks:
+  local:
