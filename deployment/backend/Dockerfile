@@ -7,16 +7,14 @@ COPY ./deployment/backend/start.sh /usr/src/app/start.sh
 
 RUN go build -v -o ./bin/backend  ./cmd/backend
 
-FROM gcr.io/distroless/base-debian12
+#FROM gcr.io/distroless/base-debian12
+#COPY --from=builder /usr/src/app/bin/backend /app/bin/backend
+#COPY --from=builder /usr/src/app/serv.env /app/serv.env
+#COPY --from=builder /usr/src/app/start.sh /app/start.sh
+#WORKDIR  /app
 
-
-COPY --from=builder /usr/src/app/bin/backend /app/bin/backend
-COPY --from=builder /usr/src/app/serv.env /app/serv.env
-COPY --from=builder /usr/src/app/start.sh /app/start.sh
 EXPOSE 8080
-
-WORKDIR  /app
-
-ENTRYPOINT [ "/app/start.sh"]
+ENTRYPOINT [ "./start.sh"]
+#ENTRYPOINT [ "./bin/backend"]
 
 
