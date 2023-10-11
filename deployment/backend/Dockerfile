@@ -9,10 +9,14 @@ RUN go build -v -o ./bin/backend  ./cmd/backend
 
 FROM gcr.io/distroless/base-debian12
 
-WORKDIR /app
-COPY --from=builder /usr/src/app/* /app/
+
+COPY --from=builder /usr/src/app/bin/backend /app/bin/backend
+COPY --from=builder /usr/src/app/serv.env /app/serv.env
+COPY --from=builder /usr/src/app/start.sh /app/start.sh
 EXPOSE 8080
 
-ENTRYPOINT [ "./start.sh"]
+WORKDIR  /app
+
+ENTRYPOINT [ "/app/start.sh"]
 
 
