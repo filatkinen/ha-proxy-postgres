@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "HaProxy"
 echo "sleep 10 seconds"
 sleep 10
 echo "starting haproxy"

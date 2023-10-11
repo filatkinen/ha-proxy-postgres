@@ -65,7 +65,7 @@ services:
     networks:
       - local
 
-  nginx01:
+  nginx:
     build:
       context: ../
       dockerfile: ./deployment/nginx/Dockerfile
@@ -132,6 +132,23 @@ services:
     networks:
       - local
 
+  client:
+    build:
+      context: ../
+      dockerfile: ./deployment/client/Dockerfile
+    container_name: lab10_client
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
 
 networks:
   local:

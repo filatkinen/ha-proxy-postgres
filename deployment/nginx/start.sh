@@ -1,6 +1,7 @@
 #!/bin/sh
-echo "sleep 30 seconds"
-sleep 30
+echo "Nginx"
+echo "sleep 25 seconds"
+sleep 25
 echo "starting nginx"
 nginx
 

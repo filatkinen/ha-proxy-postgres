@@ -1,6 +1,7 @@
 #!/bin/sh
+echo "Backend"
 echo "sleep 20 seconds"
 sleep 20
-echo "starting app"
+echo "starting backend"
 ./bin/backend
 
