@@ -65,13 +65,24 @@ services:
     networks:
       - local
 
-
-
-  loaderapp:
+  nginx01:
     build:
       context: ../
-      dockerfile: ./deployment/loader/Dockerfile
-    container_name: lab10_loader
+      dockerfile: ./deployment/nginx/Dockerfile
+    container_name: lab10_nginx01
+    restart: on-failure
+    networks:
+      - local
+    ports:
+      - "8090:8090"
+      - "8080:8080"
+
+
+  backend01:
+    build:
+      context: ../
+      dockerfile: ./deployment/backend/Dockerfile
+    container_name: lab10_backend01
     depends_on:
       pgsql01:
         condition: service_healthy
@@ -84,6 +95,43 @@ services:
     stdin_open: true
     networks:
       - local
+
+  backend02:
+    build:
+      context: ../
+      dockerfile: ./deployment/backend/Dockerfile
+    container_name: lab10_backend02
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
+
+  backend03:
+    build:
+      context: ../
+      dockerfile: ./deployment/backend/Dockerfile
+    container_name: lab10_backend03
+    depends_on:
+      pgsql01:
+        condition: service_healthy
+      pgsql02:
+        condition: service_healthy
+      pgsql03:
+        condition: service_healthy
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - local
+
 
 networks:
   local:

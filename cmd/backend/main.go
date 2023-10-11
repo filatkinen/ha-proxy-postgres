@@ -13,6 +13,7 @@ import (
 func main() {
 	var port string
 	flag.StringVar(&port, "port", "8080", "port binding")
+	flag.Parse()
 
 	err := godotenv.Load("serv.env")
 	if err != nil {

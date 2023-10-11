@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  nginx01:
+    build:
+      context: ../
+      dockerfile: ./deployment/nginx/Dockerfile
+    container_name: lab10_nginx01
+    restart: on-failure
+    networks:
+      - local
+    ports:
+      - "8090:8090"
+      - "8080:8080"
+
+
+networks:
+  local:

@@ -12,14 +12,11 @@ import (
 	"time"
 )
 
-const TimeReconnect = time.Second * 2
-
 type Database struct {
 	db           *pgxpool.Pool
 	connString   string
 	errCount     []string
 	lockErrors   sync.Mutex
-	poolUpdate   sync.RWMutex
 	errorsPingDB *int32
 }
 
@@ -39,12 +36,10 @@ func newPool(connString string) (*pgxpool.Pool, error) {
 	if err != nil {
 		log.Fatalln("Unable to parse DATABASE_URL:", err)
 	}
-	poolConfig.MaxConns = 2000
-	poolConfig.MinConns = 100
+	poolConfig.MaxConns = 50
+	poolConfig.MinConns = 10
 	db, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 
-	//db, err := sql.Open("postgres", conn)
-	//db, err := pgx.Connect(context.Background(), connString)
 	if err != nil {
 		return nil, err
 	}
@@ -63,24 +58,11 @@ func (d *Database) addErrorCount(err error) {
 	d.errCount = append(d.errCount, err.Error())
 }
 
-func (d *Database) CheckConnect() error {
+func (d *Database) checkConnect() error {
 	if err := d.db.Ping(context.Background()); err != nil {
 		atomic.AddInt32(d.errorsPingDB, 1)
 		return err
 	}
-	return nil
-}
-
-func (d *Database) ReConnect() error {
-	d.poolUpdate.Lock()
-	defer d.poolUpdate.Unlock()
-	d.db.Close()
-	time.Sleep(TimeReconnect)
-	db, err := newPool(d.connString)
-	if err != nil {
-		return err
-	}
-	d.db = db
 	return nil
 }
 
@@ -105,7 +87,6 @@ func (d *Database) SimpleQueryReturnRandomUserName() (username string, err error
 	defer func() {
 		if err != nil {
 			d.addErrorCount(err)
-			//err = errors.Join(err, d.ReConnect())
 		}
 	}()
 	defer func() {
@@ -114,10 +95,7 @@ func (d *Database) SimpleQueryReturnRandomUserName() (username string, err error
 		}
 	}()
 
-	d.poolUpdate.RLock()
-	defer d.poolUpdate.RUnlock()
-
-	if err = d.CheckConnect(); err != nil {
+	if err = d.checkConnect(); err != nil {
 		return "", err
 	}
 
