@@ -32,4 +32,5 @@ p.csv
 people.csv
 bin/
 .env
+*.env
 !deployment/*.env
