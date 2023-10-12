@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,7 +18,7 @@ func main() {
 	var StatInterval time.Duration
 	var URL string
 	flag.IntVar(&NumberWorkers, "workers", 5, "Number of workers")
-	flag.IntVar(&RaitLimitPerSecond, "raitlimits", 1000, "Rait limit per second")
+	flag.IntVar(&RaitLimitPerSecond, "raitlimits", 10000, "Rait limit per second")
 	flag.DurationVar(&StatInterval, "statinterval", time.Second*2, "Number of workers")
 	flag.StringVar(&URL, "URL", "http://localhost:8080/getname", "URL to get")
 	flag.Parse()
@@ -65,6 +66,19 @@ func workerGet(threadNumber int, statInterval time.Duration, url string, readyCh
 	answerERR := 0
 	lastErr := ""
 
+	defaultRoundTripper := http.DefaultTransport
+	defaultTransportPointer, ok := defaultRoundTripper.(*http.Transport)
+	if !ok {
+		panic(fmt.Sprintf("defaultRoundTripper not an *http.Transport"))
+	}
+	defaultTransport := defaultTransportPointer.Clone() // dereference it to get a copy of the struct that the pointer points to
+	defaultTransport.MaxIdleConns = 100
+	defaultTransport.MaxIdleConnsPerHost = 100
+	//defaultTransport.MaxConnsPerHost = 100
+	//defaultTransport.IdleConnTimeout = 1
+
+	myClient := &http.Client{Transport: defaultTransport}
+
 	for {
 		select {
 		case <-chanClose:
@@ -72,22 +86,19 @@ func workerGet(threadNumber int, statInterval time.Duration, url string, readyCh
 		case <-tiker.C:
 			fmt.Printf("Thread %d, statusOK=%d, status500=%d, err=%d\n", threadNumber, answerOK, answer500, answerERR)
 			if answerERR != 0 {
-				fmt.Printf("Thread %d, last Err=%s\n", lastErr)
+				fmt.Printf("Thread %d, last Err=%s\n", threadNumber, lastErr)
 			}
 			answer500 = 0
 			answerOK = 0
 			answerERR = 0
 		case <-readyChan:
-			client:=http.DefaultClient
-			client.Get()
-			client.
-
-			resp, err := http.Get(url)
+			resp, err := myClient.Get(url)
 			if err != nil {
 				answerERR++
 				lastErr = err.Error()
 				continue
 			}
+			_, _ = io.ReadAll(resp.Body)
 			if resp.StatusCode == http.StatusOK {
 				answerOK++
 			} else {
