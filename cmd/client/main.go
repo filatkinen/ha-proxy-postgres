@@ -91,6 +91,7 @@ func workerGet(threadNumber int, statInterval time.Duration, url string, readyCh
 			answer500 = 0
 			answerOK = 0
 			answerERR = 0
+			lastErr = ""
 		case <-readyChan:
 			resp, err := myClient.Get(url)
 			if err != nil {
@@ -102,7 +103,7 @@ func workerGet(threadNumber int, statInterval time.Duration, url string, readyCh
 			if resp.StatusCode == http.StatusOK {
 				answerOK++
 			} else {
-				answerERR++
+				answer500++
 			}
 			resp.Body.Close()
 		}
